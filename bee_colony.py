@@ -2,25 +2,11 @@ import numpy as np
 from forager import Forager
 import matplotlib.pyplot as plt
 from tqdm import tqdm
+import random
+import copy
 
 plt.ion()
 
-
-
-'''Profitability rating of honey patch depends on
-    - distance from hive
-    - nectar quality
-    - nectar bounty
-
-
-    Feedback (profitability rating) sets response threshold for an enlisting signal
-    known as waggle dance. Length of waggle dance depends on response threshold
-    and profitability rating of the patch
-
-    Waggle dance is performed on (dance floor) where individual FORAGERS observe.
-    Foragers can RANDOMLY select a dance to observe which gives location of the patch.
-
-    '''
 
 
 class BeeColony():
@@ -99,6 +85,33 @@ class BeeColony():
                     forager.r = 0.00
 
     def waggle_dance(self):
+
+        max_duration = self.best_foragers[0].profitability_rating / self.colony_profitability_rating
+        min_duration = self.best_foragers[-1].profitability_rating / self.colony_profitability_rating
+
+        for forager in self.foragers:
+            follow = random.random()
+            if (follow <= forager.r):
+                forager.preferred_tour = 1  # Set bee as follower bee
+                pick = random.uniform(min_duration, max_duration)
+                current = 0
+                for best_forager in self.best_foragers[::-1]:
+                    current += (best_forager.profitability_rating / self.colony_profitability_rating)
+                    if current > pick:
+                        #  set path of this bee to the tour of best_forager bee
+                        forager.T = copy.deepcopy(best_forager.T)
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
