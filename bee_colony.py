@@ -25,7 +25,6 @@ class BeeColony():
         self.best_foragers = []
 
 
-    #don't think this applies - bees aren't supposed to be reset since there is no pheromones here
 '''
     def reset_foragers(self):
         n = self.foragers[-1].n
@@ -100,17 +99,6 @@ class BeeColony():
                     if current > pick:
                         #  set path of this bee to the tour of best_forager bee
                         forager.T = copy.deepcopy(best_forager.T)
-
-
-
-
-
-
-
-
-
-
-
 
 
 

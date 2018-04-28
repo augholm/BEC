@@ -53,31 +53,6 @@ class Forager(GraphMatrix):
         if seq_no != self.n_machines - 1:
             self.S.append(j+1)  # it's not the last operation --> append
 
-    def select_next_op(self):
-        '''
-        PH: np.array with shape (n+2, n+2) -- i,j gives pheromone level
-        beta: float, the power we'd exponentiate (gives relative weighting on distance)
-        stochastic: if True then stochastic next operation
-            (with prob q select the best, otherwise choose according to roulette)
-
-        Selects the next operation according to CA-paper
-        '''
-        i = self.current_op
-
-        seq_nos = (np.array(self.S)-1) % self.n_machines
-        job_nos = (np.array(self.S)-1) // self.n_machines
-
-        scores = PH[i, self.S] / self.P[job_nos, seq_nos]**beta
-
-        if stochastic:  # if smaller, then treat as non-stochastic.
-            stochastic = np.random.uniform() >= q
-
-        if not stochastic:
-            max_idx = scores.argmax()
-            return self.S[max_idx]
-
-        wgt_probs = scores / scores.sum()
-        return np.random.choice(self.S, p=wgt_probs)
 
     def select_next_op(self, alpha, beta):
         '''
@@ -103,18 +78,11 @@ class Forager(GraphMatrix):
             for each in self.S:
                 p.append(alpha)
 
-
-
         numerator = 0
         for j in range(len(self.S)):
             numerator += (p[j]**alpha)
         for j in range(len(self.S)):
             P.append((p[j]**alpha) / numerator)
-
-
-
-
-
 
     def calculate_tour_length(self): #Find makespan for current bee
         C = np.zeros([self.n_jobs, self.n_machines])
@@ -127,7 +95,6 @@ class Forager(GraphMatrix):
             earliest_start = max(C[:, m_idx].max(), C[j_idx, :].max())
             C[j_idx, m_idx] = earliest_start + T
         return C.max()
-
 
     def update_profitability_rating(self):
         '''
