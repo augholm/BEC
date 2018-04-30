@@ -12,8 +12,10 @@ plt.ion()
 class BeeColony():
     def __init__(self, filename, n_foragers):
         self.foragers = []
+
         for k in range(n_foragers):
             self.foragers.append(Forager(filename))
+
         n = self.foragers[-1].n
         self.n = n
         #self.reset_foragers()
@@ -22,17 +24,20 @@ class BeeColony():
         self.alpha = 0.5
         self.beta = 2
 
-
-'''
     def reset_foragers(self):
         n = self.foragers[-1].n
 
         for F in self.foragers:
             F.current_op = 0
-            F.S = np.arange(1, n, A.n_machines).tolist()
+            F.S = np.arrange(1, n, F.n_machines).toList()
             F.T = []
-            F.V = np.zeros(shape=self.n+2, dtype=int)  # the visited set
-'''
+            F.profitability_rating = 0
+            F.global_op_count = 0
+            F.r = 1
+            if F not in self.best_foragers:
+                F.preferred_tour_indicator = 0
+                F.preferred_tour = []
+
 
     def step(self):
         '''
@@ -40,6 +45,7 @@ class BeeColony():
         - one step for each ant
         - in the end, the local step update is done (if True)
         '''
+        
         if len(self.foragers[0].S) == 0:
             raise Warning('ants probably reached end..')
 
@@ -58,6 +64,8 @@ class BeeColony():
         if n_best <= len(self.foragers):
             for i in range(n_best):
                 self.best_foragers.append(self.foragers[i])
+                self.foragers[i].preferred_tour = self.foragers[i].T
+                self.foragers[i].preferred_tour_indicator = 1
 
     def get_shortest_path_length(self):
         return min([(each, each.calculate_tour_length()) for each in self.foragers],
