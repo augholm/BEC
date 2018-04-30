@@ -15,11 +15,13 @@ class Forager(GraphMatrix):
         self.V = np.zeros(shape=self.n+2, dtype=int)  # the visited set
         self.current_op = 0
         self.profitability_rating = 0
-        self.preferred_tour = 0  # whether a forager follows another forager or not
+        self.preferred_tour_indicator = 0  # whether a forager follows another forager or not
+        self.preferred_tour = []
         self.r = 1  # probability of following a waggle dance
+        self.global_op_count = 0
 
-
-
+    def set_preferred_tour(self, T):
+        self.preferred_tour = T
 
     def move(self, j):
         '''
@@ -48,10 +50,14 @@ class Forager(GraphMatrix):
         self.current_op = j
         self.S.remove(j)
 
+        self.global_op_count+=1 # increment op count
+
         # j in n+2 --> reduce by one and get the job_no and seq_no
         seq_no = (j-1) % self.n_machines
         if seq_no != self.n_machines - 1:
             self.S.append(j+1)  # it's not the last operation --> append
+        else:
+            self.global_op_count = 0 # reset op count since we have reached the end
 
 
     def select_next_op(self, alpha, beta):
@@ -64,11 +70,14 @@ class Forager(GraphMatrix):
 
         i = self.current_op
         k = len(self.S)
-        m = self.preferred_tour
+        m = self.preferred_tour_indicator # need to add check to see if action is the same as the action in preferred path
 
         p = []  # ratings of edges between current node and all available nodes
         P = []  # probability to branch from node i to j
-        #heuristic = []   heuristic distance between node i and j - can use with preferred path?
+        durations = []
+
+        for each in self.S:
+            durations.append(self.G[i][each[1]])
 
         if k <= m:
             for each in self.S:
@@ -80,9 +89,17 @@ class Forager(GraphMatrix):
 
         numerator = 0
         for j in range(len(self.S)):
-            numerator += (p[j]**alpha)
+            numerator += (p[j]**alpha)*((1/durations[j])**beta)
         for j in range(len(self.S)):
-            P.append((p[j]**alpha) / numerator)
+            P.append(((p[j]**alpha)*((1/durations[j])**beta)) / numerator)
+
+        action = np.random.choice(self.S, p=P)
+        if action != self.preferred_tour[self.global_op_count+1]:
+            self.preferred_tour_indicator = 0
+            self.preferred_tour = []
+
+
+        return action
 
     def calculate_tour_length(self): #Find makespan for current bee
         C = np.zeros([self.n_jobs, self.n_machines])
