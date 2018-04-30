@@ -7,7 +7,7 @@ from bee_colony import BeeColony
 plt.ion()
 
 
-filename = 'data/0.txt'
+filename = 'data/2.txt'
 BC = BeeColony(filename, 10)
 
 forager, path_len = BC.run(10, plot=1)

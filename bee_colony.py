@@ -18,18 +18,19 @@ class BeeColony():
 
         n = self.foragers[-1].n
         self.n = n
-        #self.reset_foragers()
         self.colony_profitability_rating = 0
         self.best_foragers = []
-        self.alpha = 0.5
-        self.beta = 2
+        self.alpha = 1
+        self.beta = 1
+
+        self.reset_foragers()
 
     def reset_foragers(self):
         n = self.foragers[-1].n
 
         for F in self.foragers:
             F.current_op = 0
-            F.S = np.arrange(1, n, F.n_machines).toList()
+            F.S = np.arange(1, n, F.n_machines).tolist()
             F.T = []
             F.profitability_rating = 0
             F.global_op_count = 0
@@ -45,7 +46,7 @@ class BeeColony():
         - one step for each ant
         - in the end, the local step update is done (if True)
         '''
-        
+
         if len(self.foragers[0].S) == 0:
             raise Warning('ants probably reached end..')
 

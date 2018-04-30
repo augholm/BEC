@@ -76,10 +76,15 @@ class Forager(GraphMatrix):
         P = []  # probability to branch from node i to j
         durations = []
 
-        for each in self.S:
-            durations.append(self.G[i][each[1]])
+        seq_nos = (np.array(self.S)-1) % self.n_machines
+        job_nos = (np.array(self.S)-1) // self.n_machines
 
-        if k <= m:
+        for each in self.S:
+            i = (i-1) % self.n_machines
+            j = (each - 1) // self.n_machines
+            durations.append(self.P[i][j])
+
+        if m != k and m<k:
             for each in self.S:
                 p.append((1-m*alpha)/(k-m))
 
@@ -93,8 +98,9 @@ class Forager(GraphMatrix):
         for j in range(len(self.S)):
             P.append(((p[j]**alpha)*((1/durations[j])**beta)) / numerator)
 
+
         action = np.random.choice(self.S, p=P)
-        if action != self.preferred_tour[self.global_op_count+1]:
+        if self.preferred_tour_indicator == 1 and action != self.preferred_tour[self.global_op_count+1]:
             self.preferred_tour_indicator = 0
             self.preferred_tour = []
 
