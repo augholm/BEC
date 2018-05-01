@@ -8,9 +8,9 @@ plt.ion()
 
 
 filename = 'data/2.txt'
-BC = BeeColony(filename, 10)
+BC = BeeColony(filename, 5)
 
-forager, path_len = BC.run(10, plot=1)
+forager, path_len = BC.run(2, plot=1)
 
 
 print(path_len)

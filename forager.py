@@ -17,7 +17,7 @@ class Forager(GraphMatrix):
         self.profitability_rating = 0
         self.preferred_tour_indicator = 0  # whether a forager follows another forager or not
         self.preferred_tour = []
-        self.r = 1  # probability of following a waggle dance
+        self.r = 0  # probability of following a waggle dance
         self.global_op_count = 0
 
     def set_preferred_tour(self, T):
@@ -73,7 +73,7 @@ class Forager(GraphMatrix):
         m = self.preferred_tour_indicator # need to add check to see if action is the same as the action in preferred path
 
         p = []  # ratings of edges between current node and all available nodes
-        P = []  # probability to branch from node i to j
+        Probs = []  # probability to branch from node i to j
         durations = []
 
         seq_nos = (np.array(self.S)-1) % self.n_machines
@@ -84,10 +84,9 @@ class Forager(GraphMatrix):
             j = (each - 1) // self.n_machines
             durations.append(self.P[i][j])
 
-        if m != k and m<k:
+        if ((m != k) and (m<k)):
             for each in self.S:
                 p.append((1-m*alpha)/(k-m))
-
         else:
             for each in self.S:
                 p.append(alpha)
@@ -95,15 +94,17 @@ class Forager(GraphMatrix):
         numerator = 0
         for j in range(len(self.S)):
             numerator += (p[j]**alpha)*((1/durations[j])**beta)
+            #print(numerator)
         for j in range(len(self.S)):
-            P.append(((p[j]**alpha)*((1/durations[j])**beta)) / numerator)
+            #print(((p[j]**alpha)*((1/durations[j])**beta)) / numerator)
+            Probs.append(((p[j]**alpha)*((1/durations[j])**beta)) / numerator)
 
+        action = np.random.choice(self.S, p=Probs)
 
-        action = np.random.choice(self.S, p=P)
-        if self.preferred_tour_indicator == 1 and action != self.preferred_tour[self.global_op_count+1]:
-            self.preferred_tour_indicator = 0
-            self.preferred_tour = []
-
+        if self.preferred_tour_indicator == 1:
+            if action != self.preferred_tour[self.global_op_count+1]:
+                self.preferred_tour_indicator = 0
+                self.preferred_tour = []
 
         return action
 
@@ -117,11 +118,12 @@ class Forager(GraphMatrix):
             if op == 0: continue
             earliest_start = max(C[:, m_idx].max(), C[j_idx, :].max())
             C[j_idx, m_idx] = earliest_start + T
+
         return C.max()
 
     def update_profitability_rating(self):
         '''
         updates profitability rating with the formula 1/C_max
         '''
-        C_max = calculate_tour_length(self)
+        C_max = self.calculate_tour_length()
         self.profitability_rating = float(1)/C_max
