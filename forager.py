@@ -91,15 +91,19 @@ class Forager(GraphMatrix):
             for each in self.S:
                 p.append(alpha)
 
-        numerator = 0
-        for j in range(len(self.S)):
-            numerator += (p[j]**alpha)*((1/durations[j])**beta)
-            #print(numerator)
-        for j in range(len(self.S)):
-            #print(((p[j]**alpha)*((1/durations[j])**beta)) / numerator)
-            Probs.append(((p[j]**alpha)*((1/durations[j])**beta)) / numerator)
+        # if there is no waiting time for every action
+        # then we're indifferent in choosing different actions
+        if sum(p) == 0:
+            action = np.random.choice(self.S)
+        else:
+            numerator = 0
+            for j in range(len(self.S)):
+                numerator += (p[j]**alpha)*((1/durations[j])**beta)
+            for j in range(len(self.S)):
+                Probs.append(((p[j]**alpha)*((1/durations[j])**beta)) / numerator)
 
-        action = np.random.choice(self.S, p=Probs)
+            Probs = np.array(Probs) / sum(Probs)
+            action = np.random.choice(self.S, p=Probs)
 
         if self.preferred_tour_indicator == 1:
             if action != self.preferred_tour[self.global_op_count+1]:
