@@ -80,7 +80,7 @@ class Forager(GraphMatrix):
         job_nos = (np.array(self.S)-1) // self.n_machines
 
         for each in self.S:
-            i = (i-1) % self.n_machines
+            i = (each-1) % self.n_machines
             j = (each - 1) // self.n_machines
             durations.append(self.P[i][j])
 
