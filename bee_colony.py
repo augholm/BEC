@@ -35,12 +35,12 @@ class BeeColony():
             F.profitability_rating = 0
             F.global_op_count = 0
             F.r = 0
-            if F not in self.best_foragers:
-                F.preferred_tour_indicator = 0
-                F.preferred_tour = []
-            else:
-                F.preferred_tour_indicator = 1
-                F.preferred_tour = copy.deepcopy(F.T)
+            # if F not in self.best_foragers:
+            #     F.preferred_tour_indicator = 0
+            #     F.preferred_tour = []
+            # else:
+            #     F.preferred_tour_indicator = 1
+            #     F.preferred_tour = copy.deepcopy(F.T)
             F.T = []
 
 
@@ -80,8 +80,8 @@ class BeeColony():
                    key=lambda x: x[1])
 
     def update_colony_profitability_rating(self):
-        total_profitability_rating = 0
-        for forager in self.foragers:
+        total_profitability_rating = 0.0
+        for forager in self.best_foragers:
             total_profitability_rating += forager.profitability_rating
 
         n_dancers = len(self.best_foragers)  # number of foragers doing the waggle dance, assume all foragers for now
@@ -97,11 +97,11 @@ class BeeColony():
             forager_profitability = forager.profitability_rating
             if forager not in self.best_foragers:
                 if forager_profitability < 0.9*self.colony_profitability_rating:
-                    forager.r = 0.9
+                    forager.r = 0.6
                 elif forager_profitability < 0.95*self.colony_profitability_rating:
-                    forager.r = 0.85
+                    forager.r = 0.2
                 elif forager_profitability < 1.15*self.colony_profitability_rating:
-                    forager.r = 0.5
+                    forager.r = 0.02
                 else:
                     forager.r = 0.00
 
@@ -123,7 +123,9 @@ class BeeColony():
         for forager in self.foragers:
             if forager not in self.best_foragers:
                 follow = random.random()
+                print(forager.r)
                 if follow <= forager.r:
+                    print("YO")
                     forager.preferred_tour_indicator = 1
                     pick = np.random.choice(self.best_foragers, p=durations)
                     forager.preferred_tour = copy.deepcopy(pick.T)
@@ -144,7 +146,7 @@ class BeeColony():
         return f'Bee Colony with {len(self.foragers)} foragers'
 
 
-    def run(self, n_steps=10, plot=False, n_best=2, scaling_factor=100):
+    def run(self, n_steps=10, plot=False, n_best=20, scaling_factor=100):
         '''
         n_steps: int, number of steps to simulate
 
@@ -170,6 +172,8 @@ class BeeColony():
             self.assign_follow_probability()
             #self.populate_best_foragers(n_best)
             self.waggle_dance(scaling_factor)
+
+
 
             if not step == n_steps - 1:
                 self.reset_foragers()

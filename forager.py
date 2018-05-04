@@ -68,7 +68,7 @@ class Forager(GraphMatrix):
         :return:
         '''
 
-        i = self.current_op
+        #i = self.current_op
         k = len(self.S)
         m = self.preferred_tour_indicator # need to add check to see if action is the same as the action in preferred path
 
@@ -76,20 +76,19 @@ class Forager(GraphMatrix):
         Probs = []  # probability to branch from node i to j
         durations = []
 
-        seq_nos = (np.array(self.S)-1) % self.n_machines
-        job_nos = (np.array(self.S)-1) // self.n_machines
-
         for each in self.S:
             i = (each-1) % self.n_machines
-            j = (each - 1) // self.n_machines
-            durations.append(self.P[i][j])
-
+            j = (each-1) // self.n_machines
+            durations.append(self.P[j][i])
         if ((m != k) and (m<k)):
             for each in self.S:
-                p.append((1-m*alpha)/(k-m))
+                if ((m==1) and (self.preferred_tour[self.global_op_count+1] == each)):
+                    p.append((1-m*0.1)/(k-m))
+                else:
+                    p.append(1/k)
         else:
             for each in self.S:
-                p.append(alpha)
+                p.append(0.1)
 
         # if there is no waiting time for every action
         # then we're indifferent in choosing different actions
@@ -98,10 +97,9 @@ class Forager(GraphMatrix):
         else:
             numerator = 0
             for j in range(len(self.S)):
-                numerator += (p[j]**alpha)*((1/durations[j])**beta)
+                numerator += (p[j])*((1/durations[j]))
             for j in range(len(self.S)):
-                Probs.append(((p[j]**alpha)*((1/durations[j])**beta)) / numerator)
-
+                Probs.append(((p[j])*((1/durations[j]))) / numerator)
             Probs = np.array(Probs) / sum(Probs)
             action = np.random.choice(self.S, p=Probs)
 
